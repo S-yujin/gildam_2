@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>길담 · 여행 목적</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    :root{
+      --brand: #3b82f6;
+      --line: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --bg: #fff;
+    }
+    body{ background:#fff; color:var(--text); }
+    .container{ max-width:980px; margin:0 auto; padding:24px 16px 60px; }
+    .brand{ font-weight:800; font-size:20px; margin:12px 0 24px; }
+    .stepTitle{ font-size:24px; font-weight:800; margin:6px 0 8px; }
+    .desc{ color:var(--muted); margin-bottom:18px; }
+
+    .chips{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+    @media (min-width:960px){ .chips{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+    .chip{
+      display:flex; align-items:center; justify-content:center;
+      padding:12px 12px; border-radius:12px; border:1px solid var(--line);
+      background:#fff; font-weight:700; cursor:pointer; user-select:none;
+      transition: all .18s ease; text-align:center;
+    }
+    .chip:hover{ background:#f7f5ff; }
+    .chip.active{ background:var(--brand); color:#fff; border-color:var(--brand); box-shadow:0 6px 14px rgba(139,92,246,.28); }
+
+    .field{ margin-top:10px; }
+    .label{ font-weight:700; margin-bottom:8px; display:block; }
+    textarea{
+      width:100%; min-height:120px; padding:12px 14px; border-radius:12px;
+      border:1px solid var(--line); font-size:15px; line-height:1.5; resize:vertical;
+      outline:none;
+    }
+    textarea:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(139,92,246,.15); }
+
+    .metaRow{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+    .counter{ color:var(--muted); font-size:14px; }
+    .error{ color:#ef4444; font-size:14px; min-height:20px; }
+
+    .actions{ display:flex; gap:10px; margin-top:22px; }
+    .btn{ padding:12px 16px; border-radius:10px; border:1px solid var(--line); background:#fff; font-weight:700; cursor:pointer; }
+    .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+    .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  </style>
+</head>
+<body class="centered">
+  <div class="container">
+    <header class="brand">길담 · 여행 목적</header>
+
+    <h1 class="stepTitle">이번 여행의 목적을 알려주세요</h1>
+    <p class="desc">예: “바다 보며 차분히 걷고 카페에서 쉬고 싶어요”, “친구들과 활기찬 야경과 시장 구경”</p>
+
+    <div class="field">
+      <label class="label" for="purposeInput">자유롭게 작성해 주세요</label>
+      <textarea id="purposeInput" placeholder="원하는 분위기/활동/기대감을 구체적으로 적을수록 더 정교하게 추천돼요."></textarea>
+      <div class="metaRow">
+        <div class="error" id="err"></div>
+        <div class="counter"><span id="len">0</span>자 / 권장 최소 10자</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="backBtn" type="button">이전</button>
+      <button class="btn primary" id="nextBtn" type="button" disabled>다음</button>
+      <button class="btn" id="resetBtn" type="button">초기화</button>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    const KEY = 'gildam_purpose';
+    const input = document.getElementById('purposeInput');
+    const lenEl = document.getElementById('len');
+    const nextBtn = document.getElementById('nextBtn');
+    const errEl = document.getElementById('err');
+    const chips = Array.from(document.querySelectorAll('#purposeChips .chip'));
+
+    const saved = (localStorage.getItem(KEY) || '').trim();
+    if (saved) input.value = saved;
+    lenEl.textContent = input.value.length;
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        input.value = chip.textContent.trim();
+        onInput();
+      });
+    });
+
+    function validate(v){
+      const text = (v||'').trim();
+      if (text.length < 10) return '목적을 조금만 더 자세히 적어주세요. (최소 10자 권장)';
+      if (text.length > 400) return '최대 400자까지 입력할 수 있어요.';
+      return '';
+    }
+
+    function onInput(){
+      const v = input.value || '';
+      lenEl.textContent = v.length;
+      const msg = validate(v);
+      errEl.textContent = msg;
+      nextBtn.disabled = !!msg;
+      localStorage.setItem(KEY, v.trim());
+    }
+
+    input.addEventListener('input', onInput);
+    onInput();
+
+    document.getElementById('backBtn').onclick = () => location.href='emotions.html';
+    document.getElementById('nextBtn').onclick = () => {
+      const msg = validate(input.value);
+      if (msg){ errEl.textContent = msg; return; }
+      location.href = 'itinerary.html';
+    };
+    document.getElementById('resetBtn').onclick = () => {
+      resetSelections({ clearPlans: true });
+      input.value = '';
+      chips.forEach(c => c.classList.remove('active'));
+      onInput();
+    };
+  </script>
+</body>
+</html>

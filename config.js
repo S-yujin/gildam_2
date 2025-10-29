@@ -4,8 +4,9 @@ window.LLM_CONFIG = {
   endpoint: (m) => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`,
   useProxy: false,    // 🚨 여기 false
   proxyURL: "/api/generate",
-  key: "AIzaSyD-MORvwc8qFKAd57_eYR0_IGxB5yL1_SQ",          // 필요 시 직접 키 넣을 수도 있음
+  key: "APIkey",          // 필요 시 직접 키 넣을 수도 있음
   preTopK: 140,
   maxItemsPerDay: 4,
   responseMimeType: "application/json"
 };
+
